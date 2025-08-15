@@ -11,10 +11,46 @@ Git Fairy transforms your `git log` into a whimsical diary of your code's journe
 
 ---
 
+## ✅ Is it ready for use in other projects?
+
+**Yes!**  
+Git Fairy is tested, has a CLI, and exposes a programmatic API.  
+You can use it as a CLI tool or as a Node.js library in your own projects.
+
+---
+
 ## 🚀 Install (once published)
 ```bash
 npm install -g git-fairy
+# or for local/project use:
+npm install git-fairy
 ```
+
+## 🧩 Usage as a Library
+
+You can use Git Fairy in your own Node.js scripts to narrate commit histories:
+
+```js
+// ESM or TypeScript: import { narrate, getMood } from 'git-fairy';
+// CommonJS:
+const { narrate, getMood } = require('git-fairy');
+
+// Example: narrate a list of commits
+const commits = [
+  { date: '2025-08-15', message: 'fix: a thing' },
+  { date: '2025-08-16', message: 'add: new feature' }
+];
+
+const story = narrate(commits, { style: 'markdown' });
+console.log(story);
+
+// Get mood for a commit message
+console.log(getMood('fix bug')); // e.g. "😬 Nervous about breaking things"
+```
+
+See [`index.d.ts`](./index.d.ts) for full type definitions.
+
+---
 
 ## 🧪 Local Dev / Try It Now (before publishing)
 From the project root:
@@ -44,6 +80,15 @@ If your repo has no commits yet, you’ll get a friendly notice instead of an er
 ```bash
 cd your-project
 git fairy            # prints a narrated commit history
+```
+
+You can also run as a CLI:
+```bash
+npx git-fairy --help
+```
+or
+```bash
+git fairy --limit 10 --style compact
 ```
 
 ### Options
