@@ -1,0 +1,9 @@
+{
+  "fix": "😬 Nervous about breaking things",
+  "add": "😁 Excited about new features",
+  "remove": "😈 Ruthless cleanup",
+  "refactor": "🛠 Crafting code elegance",
+  "merge": "🏆 Victory!",
+  "update": "📦 Routine maintenance",
+  "default": "🤷 Just another day in git-land"
+}
