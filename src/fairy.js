@@ -8,24 +8,43 @@ function parseArgs(argv) {
   const opts = {};
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
-    if (a === '--limit' && args[i+1]) {
-      opts.limit = parseInt(args[++i], 10);
-    } else if (a === '--help' || a === '-h') {
-      opts.help = true;
-    } else if (a === '--markdown') {
-      opts.markdown = true;
-    } else if (a === '--style' && args[i+1]) {
-      opts.style = args[++i];
+    switch (a) {
+      case '--limit':
+        if (!args[i + 1]) throw new Error('Missing value for --limit');
+        opts.limit = parseInt(args[++i], 10);
+        if (Number.isNaN(opts.limit) || opts.limit < 1) throw new Error('Invalid --limit value');
+        break;
+      case '--help':
+      case '-h':
+        opts.help = true;
+        break;
+      case '--markdown':
+        opts.markdown = true;
+        break;
+      case '--style':
+        if (!args[i + 1]) throw new Error('Missing value for --style');
+        opts.style = args[++i];
+        break;
+      case '--json':
+        opts.json = true;
+        break;
+      case '--no-color':
+        opts.noColor = true;
+        break;
+      default:
+        if (a.startsWith('-')) {
+          throw new Error(`Unknown option: ${a}`);
+        }
     }
   }
   return opts;
 }
 
 function help() {
-  return `Git Fairy 🧚\n\nUsage: git fairy [options]\n\nOptions:\n  --limit <n>      Limit number of commits\n  --markdown       (reserved) Output markdown style\n  --style <name>   (reserved) Storytelling style\n  -h, --help       Show help\n`;
+  return `Git Fairy 🧚\n\nUsage: git fairy [options]\n\nOptions:\n  --limit <n>        Limit number of commits (integer > 0)\n  --markdown         Output in markdown (equivalent to --style markdown)\n  --style <name>     Story style: fairy (default), compact, markdown, json\n  --json             Shorthand for --style json (machine readable)\n  --no-color         Disable any color output (reserved for future)\n  -h, --help         Show help\n\nExamples:\n  git fairy --limit 20\n  git fairy --style compact\n  git fairy --markdown\n  git fairy --json > story.json\n`;
 }
 
-function run() {
+async function run() {
   if (!fs.existsSync(path.join(process.cwd(), '.git'))) {
     throw new Error('Not a git repository.');
   }
@@ -34,6 +53,8 @@ function run() {
     console.log(help());
     return;
   }
+  if (opts.json) opts.style = 'json';
+  if (opts.markdown && !opts.style) opts.style = 'markdown';
   const commits = getCommits(opts.limit);
   if (!commits.length) {
     console.log('🧚 No commits yet – nothing to narrate. Make some magic with `git commit`!');

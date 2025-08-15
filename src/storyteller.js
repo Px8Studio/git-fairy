@@ -9,8 +9,34 @@ function getMood(message) {
   return moods.default;
 }
 
-function narrate(commits /*, opts */) {
-  return commits.map(c => `🧚 ${c.date} – ${getMood(c.message)}\n${c.message}`).join('\n\n');
+function formatFairy(c) {
+  return `🧚 ${c.date} – ${getMood(c.message)}\n${c.message}`;
+}
+
+function formatCompact(c) {
+  return `${c.date} ${getMood(c.message)} ${c.message}`;
+}
+
+function formatMarkdown(c) {
+  return `### ${c.date} – ${getMood(c.message)}\n\n${c.message}`;
+}
+
+function narrate(commits, opts = {}) {
+  const style = (opts.style || 'fairy').toLowerCase();
+  if (style === 'json') {
+    return JSON.stringify(
+      commits.map(c => ({ ...c, mood: getMood(c.message) })),
+      null,
+      2
+    );
+  }
+  const formatter = {
+    fairy: formatFairy,
+    compact: formatCompact,
+    markdown: formatMarkdown
+  }[style] || formatFairy;
+  const joiner = style === 'compact' ? '\n' : '\n\n';
+  return commits.map(formatter).join(joiner);
 }
 
 module.exports = { narrate, getMood };
