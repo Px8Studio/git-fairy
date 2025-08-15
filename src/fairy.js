@@ -35,6 +35,18 @@ function parseArgs(argv) {
       case '--no-color':
         opts.noColor = true;
         break;
+      case '--since':
+        if (!args[i + 1]) throw new Error('Missing value for --since');
+        opts.since = args[++i];
+        break;
+      case '--until':
+        if (!args[i + 1]) throw new Error('Missing value for --until');
+        opts.until = args[++i];
+        break;
+      case '--author':
+        if (!args[i + 1]) throw new Error('Missing value for --author');
+        opts.author = args[++i];
+        break;
       default:
         if (a.startsWith('-')) {
           throw new Error(`Unknown option: ${a}`);
@@ -45,7 +57,7 @@ function parseArgs(argv) {
 }
 
 function help() {
-  return `Git Fairy 🧚\n\nUsage: git fairy [options]\n\nOptions:\n  --limit <n>        Limit number of commits (integer > 0)\n  --markdown         Output in markdown (equivalent to --style markdown)\n  --style <name>     Story style: fairy (default), compact, markdown, json\n  --json             Shorthand for --style json (machine readable)\n  --no-color         Disable any color output (reserved for future)\n  -v, --version      Print version\n  -h, --help         Show help\n\nExamples:\n  git fairy --limit 20\n  git fairy --style compact\n  git fairy --markdown\n  git fairy --json > story.json\n`;
+  return `Git Fairy 🧚\n\nUsage: git fairy [options]\n\nOptions:\n  --limit <n>        Limit number of commits (integer > 0)\n  --markdown         Output in markdown (equivalent to --style markdown)\n  --style <name>     Story style: fairy (default), compact, markdown, json\n  --json             Shorthand for --style json (machine readable)\n  --no-color         Disable color output\n  --since <date>     Only commits after date (git accepted format)\n  --until <date>     Only commits before date\n  --author <pattern> Filter by author (substring / regex)\n  -v, --version      Print version\n  -h, --help         Show help\n\nExamples:\n  git fairy --limit 20\n  git fairy --style compact\n  git fairy --markdown\n  git fairy --json > story.json\n  git fairy --since '2025-01-01' --author alice\n`;
 }
 
 function getVersion() {
@@ -71,13 +83,49 @@ async function run() {
   }
   if (opts.json) opts.style = 'json';
   if (opts.markdown && !opts.style) opts.style = 'markdown';
-  const commits = getCommits(opts.limit);
+  const config = loadConfig();
+  const effective = { ...config.defaults, ...opts };
+  const commits = getCommits(effective.limit, effective);
   if (!commits.length) {
     console.log('🧚 No commits yet – nothing to narrate. Make some magic with `git commit`!');
     return;
   }
-  const story = narrate(commits, opts);
+  const story = narrate(commits, effective);
   console.log(story);
 }
 
-module.exports = { run, parseArgs, getVersion };
+function loadConfig() {
+  const cwd = process.cwd();
+  const candidates = [
+    path.join(cwd, '.git-fairy.json'),
+    path.join(cwd, '.git-fairy.js'),
+    path.join(cwd, 'package.json')
+  ];
+  for (const file of candidates) {
+    if (!fs.existsSync(file)) continue;
+    try {
+      if (file.endsWith('.json')) {
+        const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+        if (file.endsWith('package.json')) {
+          if (data.gitFairy) return normalizeConfig(data.gitFairy);
+        } else {
+          return normalizeConfig(data);
+        }
+      } else if (file.endsWith('.js')) {
+        // eslint-disable-next-line global-require, import/no-dynamic-require
+        const loaded = require(file);
+        return normalizeConfig(loaded);
+      }
+    } catch {
+      // ignore malformed
+    }
+  }
+  return { defaults: {} };
+}
+
+function normalizeConfig(cfg) {
+  if (!cfg || typeof cfg !== 'object') return { defaults: {} };
+  return { defaults: cfg.defaults || {} };
+}
+
+module.exports = { run, parseArgs, getVersion, loadConfig };

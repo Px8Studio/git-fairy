@@ -12,7 +12,7 @@ describe('storyteller', () => {
   });
 
   it('renders fairy style by default', () => {
-    const out = narrate(commits, {});
+    const out = narrate(commits, { noColor: true });
     assert.ok(out.includes('🧚'));
   });
 
