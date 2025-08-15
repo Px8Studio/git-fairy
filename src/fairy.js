@@ -107,6 +107,14 @@ async function run() {
   if (opts.markdown && !opts.style) opts.style = 'markdown';
   const config = loadConfig();
   const effective = { ...config.defaults, ...opts };
+
+  // Set default rolling window of last 7 days if no since/until provided
+  if (!effective.since && !effective.until) {
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    effective.since = sevenDaysAgo.toISOString().slice(0, 10); // YYYY-MM-DD
+  }
+
   const commits = getCommits(effective.limit, effective);
   if (!commits.length) {
     console.log('🧚 No commits yet – nothing to narrate. Make some magic with `git commit`!');
