@@ -18,6 +18,10 @@ function parseArgs(argv) {
       case '-h':
         opts.help = true;
         break;
+      case '--version':
+      case '-v':
+        opts.version = true;
+        break;
       case '--markdown':
         opts.markdown = true;
         break;
@@ -41,17 +45,29 @@ function parseArgs(argv) {
 }
 
 function help() {
-  return `Git Fairy 🧚\n\nUsage: git fairy [options]\n\nOptions:\n  --limit <n>        Limit number of commits (integer > 0)\n  --markdown         Output in markdown (equivalent to --style markdown)\n  --style <name>     Story style: fairy (default), compact, markdown, json\n  --json             Shorthand for --style json (machine readable)\n  --no-color         Disable any color output (reserved for future)\n  -h, --help         Show help\n\nExamples:\n  git fairy --limit 20\n  git fairy --style compact\n  git fairy --markdown\n  git fairy --json > story.json\n`;
+  return `Git Fairy 🧚\n\nUsage: git fairy [options]\n\nOptions:\n  --limit <n>        Limit number of commits (integer > 0)\n  --markdown         Output in markdown (equivalent to --style markdown)\n  --style <name>     Story style: fairy (default), compact, markdown, json\n  --json             Shorthand for --style json (machine readable)\n  --no-color         Disable any color output (reserved for future)\n  -v, --version      Print version\n  -h, --help         Show help\n\nExamples:\n  git fairy --limit 20\n  git fairy --style compact\n  git fairy --markdown\n  git fairy --json > story.json\n`;
+}
+
+function getVersion() {
+  try {
+    return require('../package.json').version || '0.0.0';
+  } catch {
+    return '0.0.0';
+  }
 }
 
 async function run() {
-  if (!fs.existsSync(path.join(process.cwd(), '.git'))) {
-    throw new Error('Not a git repository.');
-  }
   const opts = parseArgs(process.argv);
   if (opts.help) {
     console.log(help());
     return;
+  }
+  if (opts.version) {
+    console.log(getVersion());
+    return;
+  }
+  if (!fs.existsSync(path.join(process.cwd(), '.git'))) {
+    throw new Error('Not a git repository.');
   }
   if (opts.json) opts.style = 'json';
   if (opts.markdown && !opts.style) opts.style = 'markdown';
@@ -64,4 +80,4 @@ async function run() {
   console.log(story);
 }
 
-module.exports = { run };
+module.exports = { run, parseArgs, getVersion };

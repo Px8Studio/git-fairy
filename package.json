@@ -4,6 +4,7 @@
   "description": "Git Fairy turns git history into a whimsical narrative.",
   "main": "src/fairy.js",
   "type": "commonjs",
+  "types": "index.d.ts",
   "exports": {
     ".": "./src/fairy.js",
     "./storyteller": "./src/storyteller.js",

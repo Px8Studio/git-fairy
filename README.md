@@ -49,6 +49,7 @@ git fairy            # prints a narrated commit history
 --style <name>    Story style: fairy (default), compact, markdown, json
 --json            Shortcut for --style json (machine readable)
 --no-color        Reserved for future color disabling
+--version         Show version
 ```
 
 ---
