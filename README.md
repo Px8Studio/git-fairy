@@ -42,12 +42,13 @@ cd your-project
 git fairy            # prints a narrated commit history
 ```
 
-### Optional (limit number of commits soon)
-Planned flags (not implemented yet):
+### Options
 ```
---limit 30      # only show last 30 commits
---markdown      # output with markdown headings
---style plain   # future storytelling styles
+--limit <n>       Limit number of commits (integer > 0)
+--markdown        Output markdown section per commit
+--style <name>    Story style: fairy (default), compact, markdown, json
+--json            Shortcut for --style json (machine readable)
+--no-color        Reserved for future color disabling
 ```
 
 ---
@@ -103,10 +104,12 @@ npm test
 ---
 
 ## 📦 Publishing Checklist
-- [ ] Update version (e.g. 0.1.0) in `package.json`
-- [ ] Fill in `author`, `repository`, `bugs`, `homepage`
-- [ ] Ensure README showcases usage
+- [ ] Pick initial semver (already set to 0.1.0 for first public release)
+- [ ] Fill in `author` in `package.json`
+- [ ] Confirm `repository`, `bugs`, `homepage` URLs are correct
+- [ ] Add any badges (npm version, CI) once published
 - [ ] `npm login`
+- [ ] Run `npm test`
 - [ ] `npm publish --access public`
 
 ---
