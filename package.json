@@ -1,6 +1,6 @@
 {
   "name": "git-fairy",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Git Fairy turns git history into a whimsical narrative.",
   "main": "src/fairy.js",
   "type": "commonjs",
