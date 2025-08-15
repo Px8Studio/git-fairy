@@ -1,5 +1,9 @@
 # 🧚 Git Fairy
 
+![CI](https://img.shields.io/github/actions/workflow/status/Px8Studio/git-fairy/ci.yml?branch=main)
+![npm](https://img.shields.io/npm/v/git-fairy)
+![license](https://img.shields.io/npm/l/git-fairy)
+
 > Source control tells you what happened.  
 > Git Fairy tells you the *story*.
 
@@ -50,6 +54,9 @@ git fairy            # prints a narrated commit history
 --json            Shortcut for --style json (machine readable)
 --no-color        Reserved for future color disabling
 --version         Show version
+--since <date>    Filter commits since date
+--until <date>    Filter commits until date
+--author <pat>    Filter commits by author match
 ```
 
 ---
@@ -69,6 +76,19 @@ Merged feature branch into main. All tests passed. Champagne time.
 ---
 
 ## 🎨 Custom Moods
+### Project Defaults via Config
+Create a `.git-fairy.json` (or `.git-fairy.js` exporting an object) or add `gitFairy` key in `package.json`:
+```json
+{
+	"defaults": {
+		"style": "compact",
+		"limit": 40,
+		"since": "2025-01-01"
+	}
+}
+```
+CLI flags always override config.
+
 Edit `src/moods.json` to add new keyword → emoji + feeling mappings. The first matching key (substring) wins; `default` is the fallback.
 
 ---
