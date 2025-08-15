@@ -1,30 +1,66 @@
 {
   "name": "git-fairy",
-  "version": "1.0.0",
-  "description": "Git Fairy tells you the story of your code.",
+  "version": "0.1.4",
+  "description": "Git Fairy turns git history into a whimsical narrative.",
   "main": "src/fairy.js",
+  "type": "commonjs",
+  "types": "index.d.ts",
+  "exports": {
+    ".": "./src/fairy.js",
+    "./storyteller": "./src/storyteller.js",
+    "./moods": "./src/moods.json"
+  },
   "bin": {
     "git-fairy": "bin/git-fairy.js"
   },
+  "files": [
+    "bin",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "test": "mocha"
+    "test": "c8 mocha",
+    "coverage": "c8 report --reporter=text-summary --reporter=lcov",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "prepare": "husky install",
+    "prepublishOnly": "npm test",
+    "release": "semantic-release"
   },
   "keywords": [
     "git",
     "log",
-    "story"
+    "story",
+    "cli",
+    "developer-experience"
   ],
   "author": "",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/your-user/git-fairy.git"
+    "url": "git+https://github.com/Px8Studio/git-fairy.git"
   },
   "bugs": {
-    "url": "https://github.com/your-user/git-fairy/issues"
+    "url": "https://github.com/Px8Studio/git-fairy/issues"
   },
-  "homepage": "https://github.com/your-user/git-fairy#readme",
+  "homepage": "https://github.com/Px8Studio/git-fairy#readme",
   "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "sideEffects": false,
+  "funding": "https://github.com/Px8Studio/git-fairy?sponsor=1",
   "devDependencies": {
-    "mocha": "^10.0.0"
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "c8": "^10.1.3",
+    "eslint": "^9.33.0",
+    "husky": "^9.1.7",
+    "mocha": "^11.7.1",
+    "prettier": "^3.6.2",
+    "semantic-release": "^24.2.7"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2"
   }
 }

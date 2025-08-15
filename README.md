@@ -1,5 +1,9 @@
 # 🧚 Git Fairy
 
+![CI](https://img.shields.io/github/actions/workflow/status/Px8Studio/git-fairy/ci.yml?branch=main)
+![npm](https://img.shields.io/npm/v/git-fairy)
+![license](https://img.shields.io/npm/l/git-fairy)
+
 > Source control tells you what happened.  
 > Git Fairy tells you the *story*.
 
@@ -7,10 +11,46 @@ Git Fairy transforms your `git log` into a whimsical diary of your code's journe
 
 ---
 
+## ✅ Is it ready for use in other projects?
+
+**Yes!**  
+Git Fairy is tested, has a CLI, and exposes a programmatic API.  
+You can use it as a CLI tool or as a Node.js library in your own projects.
+
+---
+
 ## 🚀 Install (once published)
 ```bash
 npm install -g git-fairy
+# or for local/project use:
+npm install git-fairy
 ```
+
+## 🧩 Usage as a Library
+
+You can use Git Fairy in your own Node.js scripts to narrate commit histories:
+
+```js
+// ESM or TypeScript: import { narrate, getMood } from 'git-fairy';
+// CommonJS:
+const { narrate, getMood } = require('git-fairy');
+
+// Example: narrate a list of commits
+const commits = [
+  { date: '2025-08-15', message: 'fix: a thing' },
+  { date: '2025-08-16', message: 'add: new feature' }
+];
+
+const story = narrate(commits, { style: 'markdown' });
+console.log(story);
+
+// Get mood for a commit message
+console.log(getMood('fix bug')); // e.g. "😬 Nervous about breaking things"
+```
+
+See [`index.d.ts`](./index.d.ts) for full type definitions.
+
+---
 
 ## 🧪 Local Dev / Try It Now (before publishing)
 From the project root:
@@ -42,12 +82,26 @@ cd your-project
 git fairy            # prints a narrated commit history
 ```
 
-### Optional (limit number of commits soon)
-Planned flags (not implemented yet):
+You can also run as a CLI:
+```bash
+npx git-fairy --help
 ```
---limit 30      # only show last 30 commits
---markdown      # output with markdown headings
---style plain   # future storytelling styles
+or
+```bash
+git fairy --limit 10 --style compact
+```
+
+### Options
+```
+--limit <n>       Limit number of commits (integer > 0)
+--markdown        Output markdown section per commit
+--style <name>    Story style: fairy (default), compact, markdown, json
+--json            Shortcut for --style json (machine readable)
+--no-color        Reserved for future color disabling
+--version         Show version
+--since <date>    Filter commits since date
+--until <date>    Filter commits until date
+--author <pat>    Filter commits by author match
 ```
 
 ---
@@ -67,6 +121,19 @@ Merged feature branch into main. All tests passed. Champagne time.
 ---
 
 ## 🎨 Custom Moods
+### Project Defaults via Config
+Create a `.git-fairy.json` (or `.git-fairy.js` exporting an object) or add `gitFairy` key in `package.json`:
+```json
+{
+	"defaults": {
+		"style": "compact",
+		"limit": 40,
+		"since": "2025-01-01"
+	}
+}
+```
+CLI flags always override config.
+
 Edit `src/moods.json` to add new keyword → emoji + feeling mappings. The first matching key (substring) wins; `default` is the fallback.
 
 ---
@@ -103,10 +170,12 @@ npm test
 ---
 
 ## 📦 Publishing Checklist
-- [ ] Update version (e.g. 0.1.0) in `package.json`
-- [ ] Fill in `author`, `repository`, `bugs`, `homepage`
-- [ ] Ensure README showcases usage
+- [ ] Pick initial semver (already set to 0.1.0 for first public release)
+- [ ] Fill in `author` in `package.json`
+- [ ] Confirm `repository`, `bugs`, `homepage` URLs are correct
+- [ ] Add any badges (npm version, CI) once published
 - [ ] `npm login`
+- [ ] Run `npm test`
 - [ ] `npm publish --access public`
 
 ---

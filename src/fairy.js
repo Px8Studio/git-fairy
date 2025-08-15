@@ -8,39 +8,154 @@ function parseArgs(argv) {
   const opts = {};
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
-    if (a === '--limit' && args[i+1]) {
-      opts.limit = parseInt(args[++i], 10);
-    } else if (a === '--help' || a === '-h') {
-      opts.help = true;
-    } else if (a === '--markdown') {
-      opts.markdown = true;
-    } else if (a === '--style' && args[i+1]) {
-      opts.style = args[++i];
+    switch (a) {
+      case '--limit':
+        if (!args[i + 1]) throw new Error('Missing value for --limit');
+        opts.limit = parseInt(args[++i], 10);
+        if (Number.isNaN(opts.limit) || opts.limit < 1) throw new Error('Invalid --limit value');
+        break;
+      case '--help':
+      case '-h':
+        opts.help = true;
+        break;
+      case '--version':
+      case '-v':
+        opts.version = true;
+        break;
+      case '--markdown':
+        opts.markdown = true;
+        break;
+      case '--style':
+        if (!args[i + 1]) throw new Error('Missing value for --style');
+        opts.style = args[++i];
+        break;
+      case '--json':
+        opts.json = true;
+        break;
+      case '--no-color':
+        opts.noColor = true;
+        break;
+      case '--since':
+        if (!args[i + 1]) throw new Error('Missing value for --since');
+        opts.since = args[++i];
+        break;
+      case '--until':
+        if (!args[i + 1]) throw new Error('Missing value for --until');
+        opts.until = args[++i];
+        break;
+      case '--author':
+        if (!args[i + 1]) throw new Error('Missing value for --author');
+        opts.author = args[++i];
+        break;
+      default:
+        if (a.startsWith('-')) {
+          throw new Error(`Unknown option: ${a}`);
+        }
     }
   }
   return opts;
 }
 
 function help() {
-  return `Git Fairy 🧚\n\nUsage: git fairy [options]\n\nOptions:\n  --limit <n>      Limit number of commits\n  --markdown       (reserved) Output markdown style\n  --style <name>   (reserved) Storytelling style\n  -h, --help       Show help\n`;
+  return `Git Fairy 🧚
+
+Usage: git fairy [options]
+
+Options:
+  --limit <n>        Limit number of commits (integer > 0)
+  --markdown         Output in markdown (equivalent to --style markdown)
+  --style <name>     Story style: fairy (default), compact, markdown, json
+  --json             Shorthand for --style json (machine readable)
+  --no-color         Disable color output
+  --since <date>     Only commits after date (git accepted format)
+  --until <date>     Only commits before date
+  --author <pattern> Filter by author (substring / regex)
+  -v, --version      Print version
+  -h, --help         Show help
+
+Examples:
+  git fairy --limit 20
+  git fairy --style compact
+  git fairy --markdown
+  git fairy --json > story.json
+  git fairy --since '2025-01-01' --author alice
+`;
 }
 
-function run() {
-  if (!fs.existsSync(path.join(process.cwd(), '.git'))) {
-    throw new Error('Not a git repository.');
+function getVersion() {
+  try {
+    return require('../package.json').version || '0.0.0';
+  } catch {
+    return '0.0.0';
   }
+}
+
+async function run() {
   const opts = parseArgs(process.argv);
   if (opts.help) {
     console.log(help());
     return;
   }
-  const commits = getCommits(opts.limit);
+  if (opts.version) {
+    console.log(getVersion());
+    return;
+  }
+  if (!fs.existsSync(path.join(process.cwd(), '.git'))) {
+    throw new Error('Not a git repository.');
+  }
+  if (opts.json) opts.style = 'json';
+  if (opts.markdown && !opts.style) opts.style = 'markdown';
+  const config = loadConfig();
+  const effective = { ...config.defaults, ...opts };
+
+  // Set default rolling window of last 7 days if no since/until provided
+  if (!effective.since && !effective.until) {
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    effective.since = sevenDaysAgo.toISOString().slice(0, 10); // YYYY-MM-DD
+  }
+
+  const commits = getCommits(effective.limit, effective);
   if (!commits.length) {
     console.log('🧚 No commits yet – nothing to narrate. Make some magic with `git commit`!');
     return;
   }
-  const story = narrate(commits, opts);
+  const story = narrate(commits, effective);
   console.log(story);
 }
 
-module.exports = { run };
+function loadConfig() {
+  const cwd = process.cwd();
+  const candidates = [
+    path.join(cwd, '.git-fairy.json'),
+    path.join(cwd, '.git-fairy.js'),
+    path.join(cwd, 'package.json')
+  ];
+  for (const file of candidates) {
+    if (!fs.existsSync(file)) continue;
+    try {
+      if (file.endsWith('.json')) {
+        const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+        if (file.endsWith('package.json')) {
+          if (data.gitFairy) return normalizeConfig(data.gitFairy);
+        } else {
+          return normalizeConfig(data);
+        }
+      } else if (file.endsWith('.js')) {
+        // dynamic require for optional config
+        const loaded = require(file);
+        return normalizeConfig(loaded);
+      }
+    } catch {
+      // ignore malformed
+    }
+  }
+  return { defaults: {} };
+}
+
+function normalizeConfig(cfg) {
+  if (!cfg || typeof cfg !== 'object') return { defaults: {} };
+  return { defaults: cfg.defaults || {} };
+}
+
+module.exports = { run, parseArgs, getVersion, loadConfig };
