@@ -112,7 +112,7 @@ function loadConfig() {
           return normalizeConfig(data);
         }
       } else if (file.endsWith('.js')) {
-        // eslint-disable-next-line global-require, import/no-dynamic-require
+        // dynamic require for optional config
         const loaded = require(file);
         return normalizeConfig(loaded);
       }
