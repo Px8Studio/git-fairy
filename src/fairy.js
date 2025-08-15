@@ -57,7 +57,29 @@ function parseArgs(argv) {
 }
 
 function help() {
-  return `Git Fairy 🧚\n\nUsage: git fairy [options]\n\nOptions:\n  --limit <n>        Limit number of commits (integer > 0)\n  --markdown         Output in markdown (equivalent to --style markdown)\n  --style <name>     Story style: fairy (default), compact, markdown, json\n  --json             Shorthand for --style json (machine readable)\n  --no-color         Disable color output\n  --since <date>     Only commits after date (git accepted format)\n  --until <date>     Only commits before date\n  --author <pattern> Filter by author (substring / regex)\n  -v, --version      Print version\n  -h, --help         Show help\n\nExamples:\n  git fairy --limit 20\n  git fairy --style compact\n  git fairy --markdown\n  git fairy --json > story.json\n  git fairy --since '2025-01-01' --author alice\n`;
+  return `Git Fairy 🧚
+
+Usage: git fairy [options]
+
+Options:
+  --limit <n>        Limit number of commits (integer > 0)
+  --markdown         Output in markdown (equivalent to --style markdown)
+  --style <name>     Story style: fairy (default), compact, markdown, json
+  --json             Shorthand for --style json (machine readable)
+  --no-color         Disable color output
+  --since <date>     Only commits after date (git accepted format)
+  --until <date>     Only commits before date
+  --author <pattern> Filter by author (substring / regex)
+  -v, --version      Print version
+  -h, --help         Show help
+
+Examples:
+  git fairy --limit 20
+  git fairy --style compact
+  git fairy --markdown
+  git fairy --json > story.json
+  git fairy --since '2025-01-01' --author alice
+`;
 }
 
 function getVersion() {
